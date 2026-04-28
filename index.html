@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hessian Matrix — Interactive Visualizer</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>" />
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left:'$$',right:'$$',display:true},
+              {left:'$', right:'$', display:false}
+            ]
+          });"></script>
+
+  <!-- Prism (Nord theme) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-nord.css" />
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+  <!-- Three.js (ESM via Import Map) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --nord0:  #2E3440; --nord1:  #3B4252; --nord2:  #434C5E; --nord3:  #4C566A;
+      --nord4:  #D8DEE9; --nord5:  #E5E9F0; --nord6:  #ECEFF4;
+      --nord7:  #8FBCBB; --nord8:  #88C0D0; --nord9:  #81A1C1; --nord10: #5E81AC;
+      --nord11: #BF616A; --nord12: #D08770; --nord13: #EBCB8B;
+      --nord14: #A3BE8C; --nord15: #B48EAD;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--nord0);
+      color: var(--nord4);
+      font-family: 'JetBrains Mono', monospace, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      padding: 0.6rem 1.2rem;
+      background: var(--nord1);
+      border-bottom: 1px solid var(--nord3);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+    .site-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--nord8);
+      white-space: nowrap;
+    }
+    .punchline {
+      font-size: 0.78rem;
+      color: var(--nord4);
+      font-style: italic;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Tab Nav ─────────────────────────────────────────────────────────── */
+    #tabs {
+      display: flex;
+      gap: 0;
+      background: var(--nord1);
+      border-bottom: 1px solid var(--nord3);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      padding: 0.55rem 1.1rem;
+      font: inherit;
+      font-size: 0.8rem;
+      background: transparent;
+      color: var(--nord3);
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--nord4); }
+    .tab-btn.active { color: var(--nord8); border-bottom-color: var(--nord8); }
+
+    /* ── Workspace ───────────────────────────────────────────────────────── */
+    #workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    canvas {
+      flex: 1;
+      display: block;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    #sidebar {
+      width: 270px;
+      flex-shrink: 0;
+      background: rgba(59,66,82,0.5);
+      border-left: 1px solid var(--nord3);
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* ── Control panels ──────────────────────────────────────────────────── */
+    .ctrl-panel { display: flex; flex-direction: column; gap: 0.75rem; }
+    .ctrl-panel[hidden] { display: none; }
+
+    .ctrl-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--nord9);
+      margin-bottom: 0.1rem;
+    }
+
+    .info-box {
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--nord4);
+      padding: 0.6rem 0.75rem;
+      background: var(--nord1);
+      border-radius: 8px;
+      border-left: 3px solid var(--nord3);
+    }
+
+    select, button {
+      font: inherit;
+      font-size: 0.82rem;
+      background: var(--nord1);
+      color: var(--nord5);
+      border: 1px solid var(--nord3);
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    select:hover, button:hover { border-color: var(--nord8); }
+
+    /* Sliders */
+    .slider-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .slider-group label { font-size: 0.8rem; color: var(--nord4); }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--nord8);
+    }
+
+    /* Matrix display */
+    #matrix-display, #matrix-display2 {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 2px solid var(--nord3);
+      border-radius: 10px;
+      padding: 0.7rem 0.8rem;
+      transition: border-color 0.3s;
+    }
+    .matrix-bracket {
+      font-size: 2.4rem;
+      font-weight: 100;
+      color: var(--nord4);
+      line-height: 1;
+      user-select: none;
+    }
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 1rem;
+      font-size: 0.95rem;
+      font-family: monospace;
+      text-align: right;
+      flex: 1;
+    }
+    #definiteness-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    /* Eigenvalue display */
+    .eigen-display {
+      font-size: 0.82rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--nord1);
+      border-radius: 8px;
+    }
+    .eigen-row { display: flex; justify-content: space-between; }
+    .eigen-row span:first-child { color: var(--nord9); }
+    #lambda1 { color: var(--nord12); }
+    #lambda2 { color: var(--nord9); }
+
+    /* Saddle info */
+    .saddle-info {
+      font-size: 0.78rem;
+      line-height: 1.7;
+      padding: 0.6rem 0.75rem;
+      background: var(--nord1);
+      border-radius: 8px;
+    }
+    .saddle-info .stable   { color: var(--nord14); }
+    .saddle-info .unstable { color: var(--nord11); }
+
+    /* ── Zoom control ────────────────────────────────────────────────────── */
+    #zoom-control {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(59,66,82,0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--nord3);
+      border-radius: 999px;
+      z-index: 30;
+      color: var(--nord4);
+      font-size: 1rem;
+      user-select: none;
+    }
+    #zoom-control label {
+      font-size: 0.7rem;
+      color: var(--nord4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    #zoom-slider { width: 90px; accent-color: var(--nord8); cursor: pointer; }
+
+    /* ── 💡 Button ───────────────────────────────────────────────────────── */
+    #open-math {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      line-height: 1;
+      border: 1px solid var(--nord3);
+      background: rgba(59,66,82,0.9);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    #open-math:hover { border-color: var(--nord8); transform: scale(1.1); }
+
+    /* ── Math Modal ──────────────────────────────────────────────────────── */
+    #math-modal[hidden] { display: none; }
+    #math-modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(46,52,64,0.80);
+      z-index: 50;
+    }
+    .modal-panel {
+      width: min(740px, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+      overflow: auto;
+      background: var(--nord1);
+      border: 1px solid var(--nord3);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      padding: 1.5rem;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .modal-header h2 { font-size: 1rem; color: var(--nord8); }
+    .modal-actions { display: flex; gap: 0.5rem; }
+    .modal-btn {
+      font: inherit;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--nord3);
+      border-radius: 999px;
+      background: var(--nord2);
+      color: var(--nord5);
+      cursor: pointer;
+    }
+    .modal-btn:hover { border-color: var(--nord8); }
+    .modal-body {
+      display: grid;
+      gap: 0.9rem;
+      line-height: 1.75;
+      color: var(--nord5);
+      font-size: 0.88rem;
+    }
+    .modal-body h3 {
+      color: var(--nord8);
+      font-size: 0.9rem;
+      margin-top: 0.4rem;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid var(--nord3);
+    }
+    .modal-body ul { padding-left: 1.2rem; display: grid; gap: 0.3rem; }
+    .modal-body pre[class*="language-"] {
+      border-radius: 8px; overflow-x: auto; font-size: 0.8rem; margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="site-title">Hessian Matrix</span>
+    <span class="punchline">Gradient tells you where you are. Hessian predicts what terrain lies ahead.</span>
+  </header>
+
+  <nav id="tabs">
+    <button class="tab-btn active" data-tab="terrain">① Terrain Scanner</button>
+    <button class="tab-btn"        data-tab="shaper">② Shape Shifter</button>
+    <button class="tab-btn"        data-tab="curvature">③ Curvature Ellipse</button>
+    <button class="tab-btn"        data-tab="saddle">④ Saddle Point</button>
+  </nav>
+
+  <div id="workspace">
+    <canvas id="canvas"></canvas>
+
+    <aside id="sidebar">
+
+      <!-- ① Terrain Scanner controls -->
+      <div id="ctrl-terrain" class="ctrl-panel">
+        <p class="ctrl-label">Surface Function</p>
+        <select id="surface-type">
+          <option value="bowl">Bowl — z = x² + y²</option>
+          <option value="bell">Bell — z = e^{−(x²+y²)}</option>
+          <option value="saddle">Saddle — z = x² − y²</option>
+        </select>
+        <div class="info-box">
+          Hover the cursor over the surface.<br>
+          <span style="color:var(--nord13)">▶</span> Yellow arrow = <strong>gradient</strong> (steepest ascent).<br>
+          <span style="color:var(--nord8)">▶</span> Teal plane = <strong>tangent plane</strong>.<br><br>
+          Warm colors = positive height.<br>
+          Cool colors = negative height.
+        </div>
+      </div>
+
+      <!-- ② Shape Shifter controls -->
+      <div id="ctrl-shaper" class="ctrl-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <p class="ctrl-label" style="margin-bottom:0">Hessian Entries</p>
+          <button id="reset-hessian" style="width:auto;padding:0.2rem 0.6rem;font-size:0.72rem;">Reset</button>
+        </div>
+        <div class="slider-group">
+          <label>f<sub>xx</sub> = <span id="fxx-val">1.00</span></label>
+          <input type="range" id="fxx" min="-3" max="3" step="0.01" value="1" />
+        </div>
+        <div class="slider-group">
+          <label>f<sub>yy</sub> = <span id="fyy-val">1.00</span></label>
+          <input type="range" id="fyy" min="-3" max="3" step="0.01" value="1" />
+        </div>
+        <div class="slider-group">
+          <label>f<sub>xy</sub> = <span id="fxy-val">0.00</span></label>
+          <input type="range" id="fxy" min="-3" max="3" step="0.01" value="0" />
+        </div>
+        <p class="ctrl-label" style="margin-top:0.25rem">Hessian Matrix H</p>
+        <div id="matrix-display">
+          <span class="matrix-bracket">[</span>
+          <div class="matrix-grid">
+            <span id="m00">1.00</span><span id="m01">0.00</span>
+            <span id="m10">0.00</span><span id="m11">1.00</span>
+          </div>
+          <span class="matrix-bracket">]</span>
+        </div>
+        <div id="definiteness-label">Positive Definite ▲</div>
+        <p class="ctrl-label" style="margin-top:0.25rem">Ball Simulation</p>
+        <button id="reset-ball-shaper">Reset Ball</button>
+        <div class="info-box">
+          Drag f<sub>xy</sub> to twist the surface diagonally — like wringing a towel.<br><br>
+          The ball rolls toward the minimum when positive definite, and escapes when indefinite.
+        </div>
+      </div>
+
+      <!-- ③ Curvature Ellipse controls -->
+      <div id="ctrl-curvature" class="ctrl-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <p class="ctrl-label" style="margin-bottom:0">Hessian Entries</p>
+          <button id="reset-hessian2" style="width:auto;padding:0.2rem 0.6rem;font-size:0.72rem;">Reset</button>
+        </div>
+        <div class="slider-group">
+          <label>f<sub>xx</sub> = <span id="fxx-val2">1.00</span></label>
+          <input type="range" id="fxx2" min="-3" max="3" step="0.01" value="1" />
+        </div>
+        <div class="slider-group">
+          <label>f<sub>yy</sub> = <span id="fyy-val2">1.00</span></label>
+          <input type="range" id="fyy2" min="-3" max="3" step="0.01" value="1" />
+        </div>
+        <div class="slider-group">
+          <label>f<sub>xy</sub> = <span id="fxy-val2">0.00</span></label>
+          <input type="range" id="fxy2" min="-3" max="3" step="0.01" value="0" />
+        </div>
+        <p class="ctrl-label" style="margin-top:0.25rem">Principal Curvatures</p>
+        <div class="eigen-display">
+          <div class="eigen-row"><span>λ₁ (max curvature)</span> <span id="lambda1">1.000</span></div>
+          <div class="eigen-row"><span>λ₂ (min curvature)</span> <span id="lambda2">1.000</span></div>
+        </div>
+        <div class="info-box">
+          The ellipse is the level curve $z = 2$.<br>
+          Arrows = eigenvectors (principal axes).<br>
+          Warm arrow = larger λ &nbsp; Cool arrow = smaller λ.<br><br>
+          For an indefinite matrix, the ellipse becomes a hyperbola — dashed asymptotes are shown instead.
+        </div>
+      </div>
+
+      <!-- ④ Saddle Point controls -->
+      <div id="ctrl-saddle" class="ctrl-panel">
+        <p class="ctrl-label">Ball Simulation</p>
+        <button id="reset-ball">Reset Ball</button>
+        <p class="ctrl-label" style="margin-top:0.5rem">Eigenvalues at Origin</p>
+        <div class="saddle-info">
+          <div>For $z = x^2 - y^2$:</div>
+          <div class="stable">λ₁ = +0.8 along <strong>x</strong> — stable</div>
+          <div class="unstable">λ₂ = −0.8 along <strong>y</strong> — unstable</div>
+        </div>
+        <div class="info-box">
+          The ball returns along the <span style="color:var(--nord14)">green axis</span> (bowl-shaped) and escapes along the <span style="color:var(--nord11)">red axis</span> (hill-shaped).<br><br>
+          This is why Hessian eigenvalues classify critical points.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- Zoom control -->
+  <div id="zoom-control" aria-label="Zoom">
+    <label>Zoom</label>
+    <span>−</span>
+    <input type="range" id="zoom-slider" min="0" max="100" value="50" />
+    <span>+</span>
+  </div>
+
+  <!-- 💡 Math explanation button -->
+  <button id="open-math" type="button" aria-haspopup="dialog" aria-controls="math-modal"
+          aria-label="Explain the math">💡</button>
+
+  <!-- Math Modal -->
+  <div id="math-modal" role="dialog" aria-modal="true" aria-labelledby="math-title" hidden>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="math-title">Math Behind the Scene</h2>
+        <div class="modal-actions">
+          <button id="language-toggle" class="modal-btn" type="button">Eng / 中</button>
+          <button id="close-math"      class="modal-btn" type="button" aria-label="Close">Close ✕</button>
+        </div>
+      </div>
+      <div id="math-content" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

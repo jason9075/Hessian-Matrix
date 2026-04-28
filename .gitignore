@@ -1,0 +1,8 @@
+result
+result-*
+.direnv/
+*.swp
+*.swo
+.netrwhist
+.DS_Store
+Thumbs.db
