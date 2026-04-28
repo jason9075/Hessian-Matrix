@@ -23,7 +23,7 @@ export const modalCopy = {
     <h3>Eigenvalues — Principal Bending Directions</h3>
     <p>The eigenvalues $\\lambda_1 \\geq \\lambda_2$ of $H$ describe the strength of second-order bending in the eigenvector directions. In this quadratic model, those eigenvectors point along the maximum and minimum bending directions:</p>
     <p>$$\\lambda_{1,2} = \\frac{(f_{xx}+f_{yy}) \\pm \\sqrt{(f_{xx}-f_{yy})^2 + 4f_{xy}^2}}{2}$$</p>
-    <p>Drop a ball at a saddle point: the positive-$\\lambda$ axis acts like a bowl (ball returns), the negative-$\\lambda$ axis acts like a hill (ball escapes). <em>The eigenvectors are the paths the ball most wants to roll.</em></p>
+    <p>Drop a ball at a saddle point: the positive-$\\lambda$ axis acts like a bowl (ball returns), the negative-$\\lambda$ axis acts like an inverted bowl (ball escapes). <em>The eigenvectors are the paths the ball most wants to roll.</em></p>
 
     <h3>① Terrain Scanner — First vs. Second Order</h3>
     <p>This tab shows three canonical surfaces and lets you feel the difference between first-order and second-order information:</p>
@@ -46,7 +46,7 @@ export const modalCopy = {
     </ul>
 
     <h3>③ Curvature Ellipse — Seeing Eigenstructure</h3>
-    <p>This tab shows the <em>level curve</em> $f(x,y) = c$ for $c = 2$, which is the set of points at equal "height" on the quadratic surface. For a positive definite $H$ this curve is an ellipse; for indefinite $H$ it becomes a hyperbola.</p>
+    <p>This tab shows the <em>level curve</em> $f(x,y) = c$ for $c = 2$, which is the set of points at equal "height" on the quadratic surface. For a positive definite $H$ this curve is an ellipse; for indefinite $H$ it becomes a hyperbola with two branches.</p>
     <p>The semi-axis lengths of the ellipse are directly related to the eigenvalues:</p>
     <p>$$a = \\sqrt{\\frac{2c}{\\lambda_1}}, \\quad b = \\sqrt{\\frac{2c}{\\lambda_2}}$$</p>
     <p>A <em>larger</em> eigenvalue means <em>more</em> curvature in that direction, so the ellipse is <em>narrower</em> along the corresponding eigenvector. The two arrow axes are the eigenvectors — they are always perpendicular regardless of $f_{xy}$, because $H$ is symmetric.</p>
@@ -108,7 +108,7 @@ export const modalCopy = {
     </ul>
 
     <h3>③ Curvature Ellipse — 看見特徵結構</h3>
-    <p>這個分頁顯示<em>等高線</em> $f(x,y) = c$（$c=2$），也就是二次曲面上等高度的點集。正定時為橢圓，不定時退化為雙曲線。</p>
+    <p>這個分頁顯示<em>等高線</em> $f(x,y) = c$（$c=2$），也就是二次曲面上等高度的點集。正定時為橢圓，不定時則會出現兩支雙曲線。</p>
     <p>橢圓的半軸長度與特徵值直接相關：</p>
     <p>$$a = \\sqrt{\\frac{2c}{\\lambda_1}}, \\quad b = \\sqrt{\\frac{2c}{\\lambda_2}}$$</p>
     <p>特徵值<em>越大</em>代表該方向曲率<em>越強</em>，橢圓在對應特徵向量方向上反而<em>越窄</em>。兩條箭頭軸就是特徵向量——無論 $f_{xy}$ 如何改變，它們永遠垂直，因為 $H$ 是對稱矩陣。</p>

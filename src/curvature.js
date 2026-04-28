@@ -5,7 +5,7 @@ import { createAxesGuide, eigendecompose2x2, definiteness } from './utils.js';
 export class CurvatureScene {
   constructor(renderer) {
     this.renderer = renderer;
-    this._ellipse = null;
+    this._curve = null;
     this._arrows = [];
     this._prevHash = '';
     this._zoomT = 0.5;
@@ -50,7 +50,12 @@ export class CurvatureScene {
   }
 
   _clearDrawings() {
-    if (this._ellipse) { this.scene.remove(this._ellipse); this._ellipse = null; }
+    if (this._curve) {
+      this.scene.remove(this._curve);
+      this._curve.geometry.dispose();
+      this._curve.material.dispose();
+      this._curve = null;
+    }
     this._arrows.forEach(a => this.scene.remove(a));
     this._arrows = [];
   }
@@ -88,24 +93,48 @@ export class CurvatureScene {
         ));
       }
       const ellipseColor = def === 'positive-definite' ? 0xD08770 : 0x5E81AC;
-      this._ellipse = new THREE.Line(
+      this._curve = new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(pts),
         new THREE.LineBasicMaterial({ color: ellipseColor })
       );
-      this.scene.add(this._ellipse);
-    } else {
-      // Indefinite: draw asymptotes (eigenvectors through origin)
-      const asMat = new THREE.LineDashedMaterial({ color: 0xEBCB8B, dashSize: 0.2, gapSize: 0.1 });
-      [[v1.x, v1.y], [v2.x, v2.y]].forEach(([vx, vz]) => {
-        const g = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(-vx*4.5, 0.03, -vz*4.5),
-          new THREE.Vector3( vx*4.5, 0.03,  vz*4.5),
-        ]);
-        const l = new THREE.Line(g, asMat);
-        l.computeLineDistances();
-        this.scene.add(l);
-        this._arrows.push(l);
-      });
+      this.scene.add(this._curve);
+    } else if (def === 'indefinite') {
+      const c = 2;
+      const a = Math.sqrt((2 * c) / lambda1);
+      const b = Math.sqrt((2 * c) / Math.abs(lambda2));
+      const tMax = 2.2;
+      const ptsPos = [];
+      const ptsNeg = [];
+      const angle = Math.atan2(v1.y, v1.x);
+      const rotatePoint = (u, v) => new THREE.Vector3(
+        u * Math.cos(angle) - v * Math.sin(angle),
+        0.03,
+        u * Math.sin(angle) + v * Math.cos(angle)
+      );
+
+      for (let i = 0; i <= 96; i++) {
+        const t = (i / 96) * tMax;
+        const u = a * Math.cosh(t);
+        const v = b * Math.sinh(t);
+        ptsPos.push(rotatePoint( u,  v));
+        ptsNeg.push(rotatePoint(-u,  v));
+      }
+      for (let i = 96; i >= 0; i--) {
+        const t = (i / 96) * tMax;
+        const u = a * Math.cosh(t);
+        const v = b * Math.sinh(t);
+        ptsPos.push(rotatePoint( u, -v));
+        ptsNeg.push(rotatePoint(-u, -v));
+      }
+
+      this._curve = new THREE.LineSegments(
+        new THREE.BufferGeometry().setFromPoints([
+          ...ptsPos.slice(0, -1).flatMap((p, i) => [p, ptsPos[i + 1]]),
+          ...ptsNeg.slice(0, -1).flatMap((p, i) => [p, ptsNeg[i + 1]]),
+        ]),
+        new THREE.LineBasicMaterial({ color: 0xEBCB8B })
+      );
+      this.scene.add(this._curve);
     }
 
     // Eigenvector arrows
