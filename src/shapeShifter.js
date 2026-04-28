@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createSurfaceGeometry, updateSurfaceGeometry, definiteness } from './utils.js';
+import { createAxesGuide, createSurfaceGeometry, updateSurfaceGeometry, definiteness } from './utils.js';
 
 export const HESSIAN = { fxx: 1.0, fyy: 1.0, fxy: 0.0 };
 
@@ -41,7 +41,7 @@ export class ShapeShifterScene {
     this.scene.add(new THREE.AmbientLight(0x4C566A, 0.9));
 
     this.scene.add(new THREE.GridHelper(10, 20, 0x3B4252, 0x3B4252));
-    this.scene.add(new THREE.AxesHelper(2.5));
+    this.scene.add(createAxesGuide(1.9, new THREE.Vector3(-4.8, 0, -4.8)));
 
     this.surfaceGeo = createSurfaceGeometry(surfaceFn, 5, 60);
     this.surfaceMesh = new THREE.Mesh(this.surfaceGeo, new THREE.MeshStandardMaterial({

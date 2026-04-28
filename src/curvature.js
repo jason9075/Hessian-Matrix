@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { HESSIAN } from './shapeShifter.js';
-import { eigendecompose2x2, definiteness } from './utils.js';
+import { createAxesGuide, eigendecompose2x2, definiteness } from './utils.js';
 
 export class CurvatureScene {
   constructor(renderer) {
@@ -25,6 +25,7 @@ export class CurvatureScene {
     this.camera.lookAt(0, 0, 0);
 
     this.scene.add(new THREE.GridHelper(12, 24, 0x3B4252, 0x3B4252));
+    this.scene.add(createAxesGuide(1.6, new THREE.Vector3(-5.4, 0.03, -5.4)));
 
     // X/Z axis lines
     const axisMat = new THREE.LineBasicMaterial({ color: 0x4C566A });

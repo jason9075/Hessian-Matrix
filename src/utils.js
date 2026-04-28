@@ -4,6 +4,45 @@ const NEUTRAL = new THREE.Color(0x4C566A); // Nord3
 const WARM    = new THREE.Color(0xD08770); // Nord12
 const COOL    = new THREE.Color(0x5E81AC); // Nord10
 
+export function createAxesGuide(length = 3, position = new THREE.Vector3()) {
+  const group = new THREE.Group();
+  group.position.copy(position);
+  group.add(new THREE.AxesHelper(length));
+
+  const makeLabel = (text, color, position) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 96;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#2E3440';
+    ctx.beginPath();
+    ctx.arc(48, 48, 26, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = `#${new THREE.Color(color).getHexString()}`;
+    ctx.stroke();
+    ctx.fillStyle = '#ECEFF4';
+    ctx.font = 'bold 40px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 48, 50);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.copy(position);
+    sprite.scale.setScalar(length * 0.24);
+    return sprite;
+  };
+
+  group.add(makeLabel('X', 0xff5555, new THREE.Vector3(length + 0.35, 0, 0)));
+  group.add(makeLabel('Y', 0xA3BE8C, new THREE.Vector3(0, length + 0.35, 0)));
+  group.add(makeLabel('Z', 0x5E81AC, new THREE.Vector3(0, 0, length + 0.35)));
+  return group;
+}
+
 export function heightToColor(h, maxAbs) {
   const t = Math.min(1, Math.abs(h) / Math.max(maxAbs, 0.01));
   return h >= 0

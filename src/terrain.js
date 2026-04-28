@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createSurfaceGeometry } from './utils.js';
+import { createAxesGuide, createSurfaceGeometry } from './utils.js';
 
 const SURFACES = {
   bowl:   (x, z) =>  0.35 * (x * x + z * z),
@@ -8,16 +8,36 @@ const SURFACES = {
   saddle: (x, z) =>  0.35 * (x * x - z * z),
 };
 
+const HESSIANS = {
+  bowl: () => ({ hxx: 0.7, hxz: 0.0, hzz: 0.7 }),
+  bell: (x, z) => {
+    const expTerm = Math.exp(-(x * x + z * z) * 0.6);
+    return {
+      hxx: expTerm * (2.88 * x * x - 2.4),
+      hxz: expTerm * (2.88 * x * z),
+      hzz: expTerm * (2.88 * z * z - 2.4),
+    };
+  },
+  saddle: () => ({ hxx: 0.7, hxz: 0.0, hzz: -0.7 }),
+};
+
 export class TerrainScene {
   constructor(renderer) {
     this.renderer = renderer;
     this.controls = null;
+    this._surfaceKey = 'bowl';
     this._fn = SURFACES.bowl;
     this._mouse = new THREE.Vector2();
     this._raycaster = new THREE.Raycaster();
+    this._pointReadout = document.getElementById('terrain-point-readout');
+    this._h00 = document.getElementById('terrain-h00');
+    this._h01 = document.getElementById('terrain-h01');
+    this._h10 = document.getElementById('terrain-h10');
+    this._h11 = document.getElementById('terrain-h11');
     this._buildScene();
     this._bindUI();
     this._setupMouse();
+    this._clearHoverReadout();
   }
 
   _buildScene() {
@@ -38,6 +58,7 @@ export class TerrainScene {
     const grid = new THREE.GridHelper(10, 24, 0x3B4252, 0x3B4252);
     grid.position.y = -0.02;
     this.scene.add(grid);
+    this.scene.add(createAxesGuide(2.0, new THREE.Vector3(-4.8, -0.02, -4.8)));
 
     this._buildSurface();
 
@@ -77,8 +98,10 @@ export class TerrainScene {
 
   _bindUI() {
     document.getElementById('surface-type').addEventListener('change', (e) => {
-      this._fn = SURFACES[e.target.value];
+      this._surfaceKey = e.target.value;
+      this._fn = SURFACES[this._surfaceKey];
       this._buildSurface();
+      this._onLeave();
     });
   }
 
@@ -96,9 +119,33 @@ export class TerrainScene {
       this.gradArrow.visible = false;
       this.tangentPlane.visible = false;
       this.hoverDot.visible = false;
+      this._clearHoverReadout();
     };
     el.addEventListener('mousemove', this._onMove);
     el.addEventListener('mouseleave', this._onLeave);
+  }
+
+  _format(n) {
+    return Number.isFinite(n) ? n.toFixed(2) : '--';
+  }
+
+  _clearHoverReadout() {
+    this._pointReadout.innerHTML = 'Move over the surface to inspect the local point and Hessian.';
+    this._h00.textContent = '--';
+    this._h01.textContent = '--';
+    this._h10.textContent = '--';
+    this._h11.textContent = '--';
+  }
+
+  _updateHoverReadout(point, hessian) {
+    this._pointReadout.innerHTML =
+      `x = <strong>${this._format(point.x)}</strong>, ` +
+      `z = <strong>${this._format(point.z)}</strong><br>` +
+      `y = f(x, z) = <strong>${this._format(point.y)}</strong>`;
+    this._h00.textContent = this._format(hessian.hxx);
+    this._h01.textContent = this._format(hessian.hxz);
+    this._h10.textContent = this._format(hessian.hxz);
+    this._h11.textContent = this._format(hessian.hzz);
   }
 
   _hover() {
@@ -109,6 +156,7 @@ export class TerrainScene {
       this.gradArrow.visible = false;
       this.tangentPlane.visible = false;
       this.hoverDot.visible = false;
+      this._clearHoverReadout();
       return;
     }
     const p = hits[0].point;
@@ -132,6 +180,9 @@ export class TerrainScene {
 
     this.hoverDot.position.copy(p);
     this.hoverDot.visible = true;
+
+    const hessian = HESSIANS[this._surfaceKey](p.x, p.z);
+    this._updateHoverReadout(p, hessian);
   }
 
   activate() {

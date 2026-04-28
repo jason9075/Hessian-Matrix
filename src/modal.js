@@ -1,15 +1,15 @@
 export const modalCopy = {
   en: `
     <h3>The Hessian Matrix</h3>
-    <p>For a smooth function $f(x, y)$, the Hessian $H$ encodes all second-order curvature at a point:</p>
+    <p>For a smooth function $f(x, y)$, the Hessian $H$ encodes the second-order derivative information at a point:</p>
     <p>$$H = \\begin{bmatrix} f_{xx} & f_{xy} \\\\ f_{yx} & f_{yy} \\end{bmatrix}$$</p>
     <p>Because $f_{xy} = f_{yx}$ (Schwarz's theorem), $H$ is always <strong>symmetric</strong> — it has real eigenvalues and orthogonal eigenvectors.</p>
 
     <h3>What Each Entry Means</h3>
     <ul>
-      <li>$f_{xx}$: curvature along $x$ — positive = concave up (bowl), negative = concave down</li>
-      <li>$f_{yy}$: curvature along $y$</li>
-      <li>$f_{xy}$: twist — how the slope in $x$ changes as you move along $y$ (like wringing a towel)</li>
+      <li>$f_{xx}$: second derivative along $x$ — positive = concave up (bowl), negative = concave down</li>
+      <li>$f_{yy}$: second derivative along $y$</li>
+      <li>$f_{xy}$: mixed partial derivative — how the slope in $x$ changes as you move along $y$</li>
     </ul>
 
     <h3>Classifying Critical Points</h3>
@@ -20,8 +20,8 @@ export const modalCopy = {
       <li><span style="color:#EBCB8B"><strong>Indefinite</strong></span> — $\\det H < 0$: saddle point — stable one way, unstable the other</li>
     </ul>
 
-    <h3>Eigenvalues — Principal Curvatures</h3>
-    <p>The eigenvalues $\\lambda_1 \\geq \\lambda_2$ of $H$ are the <em>principal curvatures</em>. Their eigenvectors point in the directions of maximum and minimum bending:</p>
+    <h3>Eigenvalues — Principal Bending Directions</h3>
+    <p>The eigenvalues $\\lambda_1 \\geq \\lambda_2$ of $H$ describe the strength of second-order bending in the eigenvector directions. In this quadratic model, those eigenvectors point along the maximum and minimum bending directions:</p>
     <p>$$\\lambda_{1,2} = \\frac{(f_{xx}+f_{yy}) \\pm \\sqrt{(f_{xx}-f_{yy})^2 + 4f_{xy}^2}}{2}$$</p>
     <p>Drop a ball at a saddle point: the positive-$\\lambda$ axis acts like a bowl (ball returns), the negative-$\\lambda$ axis acts like a hill (ball escapes). <em>The eigenvectors are the paths the ball most wants to roll.</em></p>
 
@@ -63,15 +63,15 @@ export const modalCopy = {
   `,
   zhTW: `
     <h3>Hessian 矩陣（海森矩陣）</h3>
-    <p>對於光滑函數 $f(x, y)$，Hessian 矩陣 $H$ 描述某一點所有二階曲率資訊：</p>
+    <p>對於光滑函數 $f(x, y)$，Hessian 矩陣 $H$ 描述某一點的二階偏導資訊：</p>
     <p>$$H = \\begin{bmatrix} f_{xx} & f_{xy} \\\\ f_{yx} & f_{yy} \\end{bmatrix}$$</p>
     <p>由 Schwarz 定理，$f_{xy} = f_{yx}$，所以 $H$ 永遠是<strong>實對稱矩陣</strong>——特徵值皆為實數，特徵向量互相垂直。</p>
 
     <h3>各元素的物理意義</h3>
     <ul>
-      <li>$f_{xx}$：沿 $x$ 軸的彎曲度；正值向上彎（碗狀），負值向下彎</li>
-      <li>$f_{yy}$：沿 $y$ 軸的彎曲度</li>
-      <li>$f_{xy}$：扭曲程度（twist）——想像用手擰毛巾時的對角變形</li>
+      <li>$f_{xx}$：沿 $x$ 軸的二階偏導數；正值代表向上彎（碗狀），負值代表向下彎</li>
+      <li>$f_{yy}$：沿 $y$ 軸的二階偏導數</li>
+      <li>$f_{xy}$：混合偏導數，描述你沿 $y$ 移動時，$x$ 方向斜率如何改變</li>
     </ul>
 
     <h3>臨界點的判別</h3>
@@ -82,8 +82,8 @@ export const modalCopy = {
       <li><span style="color:#EBCB8B"><strong>不定（Indefinite）</strong></span>：鞍點——一個方向穩定、另一方向不穩定</li>
     </ul>
 
-    <h3>特徵值——主曲率</h3>
-    <p>$H$ 的特徵值 $\\lambda_1 \\geq \\lambda_2$ 就是<em>主曲率</em>，對應的特徵向量指向曲面彎曲最劇烈與最平緩的方向：</p>
+    <h3>特徵值——主彎曲方向與強度</h3>
+    <p>$H$ 的特徵值 $\\lambda_1 \\geq \\lambda_2$ 描述二階變化的強弱；對應的特徵向量則指向彎曲最劇烈與最平緩的方向。在這個二次近似模型中，這些方向就是主方向：</p>
     <p>$$\\lambda_{1,2} = \\frac{(f_{xx}+f_{yy}) \\pm \\sqrt{(f_{xx}-f_{yy})^2 + 4f_{xy}^2}}{2}$$</p>
     <p>把球放在鞍點：$\\lambda > 0$ 的方向像碗，球會被拉回；$\\lambda < 0$ 的方向像山坡，球順勢滾走。<em>特徵向量就是「球最想滾動的路徑」。</em></p>
 

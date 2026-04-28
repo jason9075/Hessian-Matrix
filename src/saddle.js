@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createSurfaceGeometry } from './utils.js';
+import { createAxesGuide, createSurfaceGeometry } from './utils.js';
 
 // z = 0.5*(x² − z²): stable in x, unstable in z
 const saddleFn = (x, z) => 0.4 * (x * x - z * z);
@@ -40,7 +40,7 @@ export class SaddleScene {
     const grid = new THREE.GridHelper(10, 20, 0x3B4252, 0x3B4252);
     grid.position.y = -1.5;
     this.scene.add(grid);
-    this.scene.add(new THREE.AxesHelper(3));
+    this.scene.add(createAxesGuide(2.0, new THREE.Vector3(-4.8, -1.48, -4.8)));
 
     // Eigenvector arrows at origin (λ₁=+0.8 x-axis, λ₂=-0.8 z-axis)
     this.ev1Arrow = new THREE.ArrowHelper(

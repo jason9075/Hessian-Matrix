@@ -168,7 +168,7 @@
     }
 
     /* Matrix display */
-    #matrix-display, #matrix-display2 {
+    #matrix-display, #matrix-display2, .matrix-display {
       display: flex;
       align-items: center;
       gap: 0.4rem;
@@ -366,6 +366,19 @@
           <span style="color:var(--nord8)">▶</span> Teal plane = <strong>tangent plane</strong>.<br><br>
           Warm colors = positive height.<br>
           Cool colors = negative height.
+        </div>
+        <p class="ctrl-label" style="margin-top:0.25rem">Hovered Point</p>
+        <div class="info-box" id="terrain-point-readout">
+          Move over the surface to inspect the local point and Hessian.
+        </div>
+        <p class="ctrl-label" style="margin-top:0.25rem">Hessian H(x, z)</p>
+        <div class="matrix-display">
+          <span class="matrix-bracket">[</span>
+          <div class="matrix-grid">
+            <span id="terrain-h00">--</span><span id="terrain-h01">--</span>
+            <span id="terrain-h10">--</span><span id="terrain-h11">--</span>
+          </div>
+          <span class="matrix-bracket">]</span>
         </div>
       </div>
 
