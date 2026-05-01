@@ -277,15 +277,15 @@
     /* ── GitHub Ribbon ───────────────────────────────────────────────────── */
     .github-ribbon {
       position: fixed;
-      top: 0;
-      right: 0;
+      top: -4px;
+      right: -4px;
       z-index: 40;
       line-height: 0;
     }
     .github-ribbon img {
       display: block;
-      width: 110px;
-      height: 110px;
+      width: 84px;
+      height: 84px;
       pointer-events: auto;
     }
 
@@ -377,9 +377,9 @@
       <div id="ctrl-terrain" class="ctrl-panel">
         <p class="ctrl-label">Surface Function</p>
         <select id="surface-type">
-          <option value="bowl">Bowl — z = x² + y²</option>
-          <option value="bell">Bell — z = e^{−(x²+y²)}</option>
-          <option value="saddle">Saddle — z = x² − y²</option>
+          <option value="bowl">Bowl: y = 0.35(x² + z²)</option>
+          <option value="bell">Bell: y = 2e^{−0.6(x²+z²)}</option>
+          <option value="saddle">Saddle: y = 0.35(x² − z²)</option>
         </select>
         <div class="info-box">
           Hover the cursor over the surface.<br>
@@ -390,14 +390,23 @@
         </div>
         <p class="ctrl-label" style="margin-top:0.25rem">Hovered Point</p>
         <div class="info-box" id="terrain-point-readout">
-          Move over the surface to inspect the local point and Hessian.
+          Move over the surface to inspect the local point.
         </div>
-        <p class="ctrl-label" style="margin-top:0.25rem">Hessian H(x, z)</p>
+        <p class="ctrl-label" style="margin-top:0.25rem">Jacobian J(x, z)</p>
         <div class="matrix-display">
           <span class="matrix-bracket">[</span>
           <div class="matrix-grid">
-            <span id="terrain-h00">--</span><span id="terrain-h01">--</span>
-            <span id="terrain-h10">--</span><span id="terrain-h11">--</span>
+            <span id="terrain-j00">--</span><span id="terrain-j01">0.00</span>
+            <span id="terrain-j10">0.00</span><span id="terrain-j11">--</span>
+          </div>
+          <span class="matrix-bracket">]</span>
+        </div>
+        <p class="ctrl-label" style="margin-top:0.25rem">Hover Hessian H(x, z)</p>
+        <div class="matrix-display">
+          <span class="matrix-bracket">[</span>
+          <div class="matrix-grid">
+            <span id="terrain-hover-h00">--</span><span id="terrain-hover-h01">--</span>
+            <span id="terrain-hover-h10">--</span><span id="terrain-hover-h11">--</span>
           </div>
           <span class="matrix-bracket">]</span>
         </div>
@@ -463,7 +472,7 @@
           <div class="eigen-row"><span>λ₂ (min curvature)</span> <span id="lambda2">1.000</span></div>
         </div>
         <div class="info-box">
-          The ellipse is the level curve $z = 2$.<br>
+          The ellipse is the level curve $f(x, z) = 2$.<br>
           Arrows = eigenvectors (principal axes).<br>
           Warm arrow = larger λ &nbsp; Cool arrow = smaller λ.<br><br>
           For an indefinite matrix, the level curve becomes a hyperbola, and both branches are drawn.
@@ -476,9 +485,9 @@
         <button id="reset-ball">Reset Ball</button>
         <p class="ctrl-label" style="margin-top:0.5rem">Eigenvalues at Origin</p>
         <div class="saddle-info">
-          <div>For $z = x^2 - y^2$:</div>
+          <div>For $y = 0.4(x^2 - z^2)$:</div>
           <div class="stable">λ₁ = +0.8 along <strong>x</strong> — stable</div>
-          <div class="unstable">λ₂ = −0.8 along <strong>y</strong> — unstable</div>
+          <div class="unstable">λ₂ = −0.8 along <strong>z</strong> — unstable</div>
         </div>
         <div class="info-box">
           The ball returns along the <span style="color:var(--nord14)">green axis</span> (bowl-shaped) and escapes along the <span style="color:var(--nord11)">red axis</span> (inverted-bowl-shaped).<br><br>

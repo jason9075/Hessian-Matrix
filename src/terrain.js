@@ -30,10 +30,14 @@ export class TerrainScene {
     this._mouse = new THREE.Vector2();
     this._raycaster = new THREE.Raycaster();
     this._pointReadout = document.getElementById('terrain-point-readout');
-    this._h00 = document.getElementById('terrain-h00');
-    this._h01 = document.getElementById('terrain-h01');
-    this._h10 = document.getElementById('terrain-h10');
-    this._h11 = document.getElementById('terrain-h11');
+    this._j00 = document.getElementById('terrain-j00');
+    this._j01 = document.getElementById('terrain-j01');
+    this._j10 = document.getElementById('terrain-j10');
+    this._j11 = document.getElementById('terrain-j11');
+    this._hoverH00 = document.getElementById('terrain-hover-h00');
+    this._hoverH01 = document.getElementById('terrain-hover-h01');
+    this._hoverH10 = document.getElementById('terrain-hover-h10');
+    this._hoverH11 = document.getElementById('terrain-hover-h11');
     this._buildScene();
     this._bindUI();
     this._setupMouse();
@@ -130,22 +134,30 @@ export class TerrainScene {
   }
 
   _clearHoverReadout() {
-    this._pointReadout.innerHTML = 'Move over the surface to inspect the local point and Hessian.';
-    this._h00.textContent = '--';
-    this._h01.textContent = '--';
-    this._h10.textContent = '--';
-    this._h11.textContent = '--';
+    this._pointReadout.innerHTML = 'Move over the surface to inspect the local point.';
+    this._j00.textContent = '--';
+    this._j01.textContent = '0.00';
+    this._j10.textContent = '0.00';
+    this._j11.textContent = '--';
+    this._hoverH00.textContent = '--';
+    this._hoverH01.textContent = '--';
+    this._hoverH10.textContent = '--';
+    this._hoverH11.textContent = '--';
   }
 
-  _updateHoverReadout(point, hessian) {
+  _updateHoverReadout(point, jacobian, hessian) {
     this._pointReadout.innerHTML =
       `x = <strong>${this._format(point.x)}</strong>, ` +
       `z = <strong>${this._format(point.z)}</strong><br>` +
       `y = f(x, z) = <strong>${this._format(point.y)}</strong>`;
-    this._h00.textContent = this._format(hessian.hxx);
-    this._h01.textContent = this._format(hessian.hxz);
-    this._h10.textContent = this._format(hessian.hxz);
-    this._h11.textContent = this._format(hessian.hzz);
+    this._j00.textContent = this._format(jacobian.fx);
+    this._j01.textContent = '0.00';
+    this._j10.textContent = '0.00';
+    this._j11.textContent = this._format(jacobian.fz);
+    this._hoverH00.textContent = this._format(hessian.hxx);
+    this._hoverH01.textContent = this._format(hessian.hxz);
+    this._hoverH10.textContent = this._format(hessian.hxz);
+    this._hoverH11.textContent = this._format(hessian.hzz);
   }
 
   _hover() {
@@ -182,7 +194,7 @@ export class TerrainScene {
     this.hoverDot.visible = true;
 
     const hessian = HESSIANS[this._surfaceKey](p.x, p.z);
-    this._updateHoverReadout(p, hessian);
+    this._updateHoverReadout(p, { fx: gx, fz: gz }, hessian);
   }
 
   activate() {

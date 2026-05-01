@@ -1,7 +1,7 @@
 export const modalCopy = {
   en: `
     <h3>The Hessian Matrix</h3>
-    <p>For a smooth function $f(x, y)$, the Hessian $H$ encodes the second-order derivative information at a point:</p>
+    <p>For a smooth height field $y = f(x, z)$, the Hessian $H$ encodes the second-order derivative information at a point in the $x$-$z$ plane:</p>
     <p>$$H = \\begin{bmatrix} f_{xx} & f_{xy} \\\\ f_{yx} & f_{yy} \\end{bmatrix}$$</p>
     <p>Because $f_{xy} = f_{yx}$ (Schwarz's theorem), $H$ is always <strong>symmetric</strong> — it has real eigenvalues and orthogonal eigenvectors.</p>
 
@@ -28,15 +28,15 @@ export const modalCopy = {
     <h3>① Terrain Scanner — First vs. Second Order</h3>
     <p>This tab shows three canonical surfaces and lets you feel the difference between first-order and second-order information:</p>
     <ul>
-      <li><strong>Bowl</strong> $z = x^2 + y^2$: $H = 2I$, positive definite everywhere. Every point is a local bowl; the gradient always points uphill toward the rim.</li>
-      <li><strong>Bell</strong> $z = e^{-(x^2+y^2)}$: $H$ is positive definite away from the peak, but <em>zero</em> at the summit — the gradient vanishes and the Hessian alone decides you're at a maximum.</li>
-      <li><strong>Saddle</strong> $z = x^2 - y^2$: $H = \\begin{bmatrix}2&0\\\\0&-2\\end{bmatrix}$, indefinite. The gradient at the origin is zero, yet it is <em>not</em> an extremum.</li>
+      <li><strong>Bowl</strong> $y = 0.35(x^2 + z^2)$: $H = \\begin{bmatrix}0.7&0\\\\0&0.7\\end{bmatrix}$, positive definite everywhere. Every point is a local bowl; the gradient always points uphill toward the rim.</li>
+      <li><strong>Bell</strong> $y = 2e^{-0.6(x^2+z^2)}$: the Hessian varies with position. At the summit, the gradient vanishes and the Hessian is negative definite, identifying a local maximum.</li>
+      <li><strong>Saddle</strong> $y = 0.35(x^2 - z^2)$: $H = \\begin{bmatrix}0.7&0\\\\0&-0.7\\end{bmatrix}$, indefinite. The gradient at the origin is zero, yet it is <em>not</em> an extremum.</li>
     </ul>
     <p>The yellow arrow (gradient $\\nabla f$) tells you the steepest direction <em>right now</em>. The teal plane (tangent plane) is the first-order approximation. The Hessian describes how that plane tilts as you move — information the gradient alone cannot provide.</p>
 
     <h3>② Shape Shifter — Sculpting Curvature</h3>
     <p>The surface displayed is the exact second-order Taylor expansion centered at the origin:</p>
-    <p>$$f(x,y) \\approx \\tfrac{1}{2}\\bigl(f_{xx}\\,x^2 + 2f_{xy}\\,xy + f_{yy}\\,y^2\\bigr)$$</p>
+    <p>$$f(x,z) \\approx \\tfrac{1}{2}\\bigl(f_{xx}\\,x^2 + 2f_{xy}\\,xz + f_{yy}\\,z^2\\bigr)$$</p>
     <p>Dragging the sliders directly edits the three independent entries of $H$. Key observations:</p>
     <ul>
       <li>$f_{xx}$ and $f_{yy}$ independently control curvature along the coordinate axes. Equal positive values → circular bowl; unequal → elliptic bowl.</li>
@@ -46,24 +46,24 @@ export const modalCopy = {
     </ul>
 
     <h3>③ Curvature Ellipse — Seeing Eigenstructure</h3>
-    <p>This tab shows the <em>level curve</em> $f(x,y) = c$ for $c = 2$, which is the set of points at equal "height" on the quadratic surface. For a positive definite $H$ this curve is an ellipse; for indefinite $H$ it becomes a hyperbola with two branches.</p>
+    <p>This tab shows the <em>level curve</em> $f(x,z) = c$ for $c = 2$, which is the set of points at equal height on the quadratic surface. For a positive definite $H$ this curve is an ellipse; for indefinite $H$ it becomes a hyperbola with two branches.</p>
     <p>The semi-axis lengths of the ellipse are directly related to the eigenvalues:</p>
     <p>$$a = \\sqrt{\\frac{2c}{\\lambda_1}}, \\quad b = \\sqrt{\\frac{2c}{\\lambda_2}}$$</p>
     <p>A <em>larger</em> eigenvalue means <em>more</em> curvature in that direction, so the ellipse is <em>narrower</em> along the corresponding eigenvector. The two arrow axes are the eigenvectors — they are always perpendicular regardless of $f_{xy}$, because $H$ is symmetric.</p>
     <p>Try this: set $f_{xx} = f_{yy} = 1$, $f_{xy} = 0$ → circle. Now increase $f_{xy}$ → the circle stays a circle (eigenvalues unchanged) but the axes rotate. Then set $f_{xx} = 2$, $f_{yy} = 0.5$ → ellipse with axes aligned. Add $f_{xy}$ → the ellipse rotates.</p>
 
     <h3>④ Saddle Point — Why Hessian Matters in Optimization</h3>
-    <p>The saddle surface $z = x^2 - y^2$ has $\\nabla f = 0$ at the origin — a critical point. Yet a gradient-descent optimizer would get <em>stuck</em> here, mistaking it for a minimum.</p>
-    <p>The Hessian immediately reveals the problem: $H = \\begin{bmatrix}2&0\\\\0&-2\\end{bmatrix}$, with $\\det H = -4 < 0$ — indefinite. Eigenvalues $+2$ and $-2$ coexist.</p>
+    <p>The saddle surface $y = 0.4(x^2 - z^2)$ has $\\nabla f = 0$ at the origin — a critical point. Yet a gradient-descent optimizer would get <em>stuck</em> here, mistaking it for a minimum.</p>
+    <p>The Hessian immediately reveals the problem: $H = \\begin{bmatrix}0.8&0\\\\0&-0.8\\end{bmatrix}$, with $\\det H = -0.64 < 0$ — indefinite. Eigenvalues $+0.8$ and $-0.8$ coexist.</p>
     <ul>
-      <li><span style="color:#A3BE8C"><strong>Along the $x$-axis</strong></span> (green arrow, $\\lambda = +2$): the surface curves upward. A ball placed here rolls <em>back</em> to the origin — locally stable.</li>
-      <li><span style="color:#BF616A"><strong>Along the $y$-axis</strong></span> (red arrow, $\\lambda = -2$): the surface curves downward. A ball rolls <em>away</em> — unstable.</li>
+      <li><span style="color:#A3BE8C"><strong>Along the $x$-axis</strong></span> (green arrow, $\\lambda = +0.8$): the surface curves upward. A ball placed here rolls <em>back</em> to the origin — locally stable.</li>
+      <li><span style="color:#BF616A"><strong>Along the $z$-axis</strong></span> (red arrow, $\\lambda = -0.8$): the surface curves downward. A ball rolls <em>away</em> — unstable.</li>
     </ul>
     <p>This is the core reason modern optimizers (Adam, L-BFGS) use Hessian information or its approximation: gradient alone cannot distinguish a minimum from a saddle point. The Hessian's eigenvalue signature — all positive, all negative, or mixed — makes the classification unambiguous.</p>
   `,
   zhTW: `
     <h3>Hessian 矩陣（海森矩陣）</h3>
-    <p>對於光滑函數 $f(x, y)$，Hessian 矩陣 $H$ 描述某一點的二階偏導資訊：</p>
+    <p>對於光滑高度函數 $y = f(x, z)$，Hessian 矩陣 $H$ 描述其在 $x$-$z$ 平面上某一點的二階偏導資訊：</p>
     <p>$$H = \\begin{bmatrix} f_{xx} & f_{xy} \\\\ f_{yx} & f_{yy} \\end{bmatrix}$$</p>
     <p>由 Schwarz 定理，$f_{xy} = f_{yx}$，所以 $H$ 永遠是<strong>實對稱矩陣</strong>——特徵值皆為實數，特徵向量互相垂直。</p>
 
@@ -90,15 +90,15 @@ export const modalCopy = {
     <h3>① Terrain Scanner — 一階 vs 二階資訊</h3>
     <p>這個分頁展示三種標準曲面，讓你感受梯度（一階）與 Hessian（二階）各自提供的資訊：</p>
     <ul>
-      <li><strong>碗形（Bowl）</strong> $z = x^2 + y^2$：$H = 2I$，處處正定。每個點都是局部最小值，梯度永遠指向上坡方向。</li>
-      <li><strong>鐘形（Bell）</strong> $z = e^{-(x^2+y^2)}$：遠離頂點時正定，但在頂點本身梯度為零、$H$ 為負定——唯有 Hessian 能告訴你「這是極大值」。</li>
-      <li><strong>鞍形（Saddle）</strong> $z = x^2 - y^2$：$H = \\begin{bmatrix}2&0\\\\0&-2\\end{bmatrix}$，不定。原點梯度為零，卻不是極值——靠梯度根本無法判斷。</li>
+      <li><strong>碗形（Bowl）</strong> $y = 0.35(x^2 + z^2)$：$H = \\begin{bmatrix}0.7&0\\\\0&0.7\\end{bmatrix}$，處處正定。每個點都是局部碗狀，梯度永遠指向上坡方向。</li>
+      <li><strong>鐘形（Bell）</strong> $y = 2e^{-0.6(x^2+z^2)}$：Hessian 會隨位置改變；在頂點本身梯度為零、$H$ 為負定，唯有 Hessian 能告訴你「這是極大值」。</li>
+      <li><strong>鞍形（Saddle）</strong> $y = 0.35(x^2 - z^2)$：$H = \\begin{bmatrix}0.7&0\\\\0&-0.7\\end{bmatrix}$，不定。原點梯度為零，卻不是極值——靠梯度根本無法判斷。</li>
     </ul>
     <p>黃色箭頭（梯度 $\\nabla f$）代表「現在最陡的方向」。藍色平面（切平面）是一階近似。Hessian 描述的是：當你移動時，這個切平面如何傾斜——這是梯度無法回答的問題。</p>
 
     <h3>② Shape Shifter — 親手塑造曲率</h3>
     <p>畫面上的曲面就是以原點為中心的二階 Taylor 展開：</p>
-    <p>$$f(x,y) \\approx \\tfrac{1}{2}\\bigl(f_{xx}\\,x^2 + 2f_{xy}\\,xy + f_{yy}\\,y^2\\bigr)$$</p>
+    <p>$$f(x,z) \\approx \\tfrac{1}{2}\\bigl(f_{xx}\\,x^2 + 2f_{xy}\\,xz + f_{yy}\\,z^2\\bigr)$$</p>
     <p>拉動滑桿等同於直接編輯 $H$ 的三個獨立元素。幾個關鍵直覺：</p>
     <ul>
       <li>$f_{xx}$ 和 $f_{yy}$ 分別控制座標軸方向的彎曲度。兩者相等為圓形碗；不相等為橢圓碗。</li>
@@ -108,18 +108,18 @@ export const modalCopy = {
     </ul>
 
     <h3>③ Curvature Ellipse — 看見特徵結構</h3>
-    <p>這個分頁顯示<em>等高線</em> $f(x,y) = c$（$c=2$），也就是二次曲面上等高度的點集。正定時為橢圓，不定時則會出現兩支雙曲線。</p>
+    <p>這個分頁顯示<em>等高線</em> $f(x,z) = c$（$c=2$），也就是二次曲面上等高度的點集。正定時為橢圓，不定時則會出現兩支雙曲線。</p>
     <p>橢圓的半軸長度與特徵值直接相關：</p>
     <p>$$a = \\sqrt{\\frac{2c}{\\lambda_1}}, \\quad b = \\sqrt{\\frac{2c}{\\lambda_2}}$$</p>
     <p>特徵值<em>越大</em>代表該方向曲率<em>越強</em>，橢圓在對應特徵向量方向上反而<em>越窄</em>。兩條箭頭軸就是特徵向量——無論 $f_{xy}$ 如何改變，它們永遠垂直，因為 $H$ 是對稱矩陣。</p>
     <p>試試這個：設 $f_{xx} = f_{yy} = 1$，$f_{xy} = 0$ → 圓形。增加 $f_{xy}$ → 仍是圓形（特徵值不變），但軸旋轉了。再設 $f_{xx} = 2$，$f_{yy} = 0.5$ → 橢圓軸對齊座標軸。加入 $f_{xy}$ → 橢圓整體旋轉。</p>
 
     <h3>④ Saddle Point — Hessian 在最佳化中的核心價值</h3>
-    <p>鞍面 $z = x^2 - y^2$ 在原點的梯度為零，是一個臨界點。若用梯度下降法，優化器會在此<em>卡住</em>，誤以為找到了極小值。</p>
-    <p>Hessian 立刻揭穿問題：$H = \\begin{bmatrix}2&0\\\\0&-2\\end{bmatrix}$，$\\det H = -4 < 0$——不定矩陣，特徵值一正一負。</p>
+    <p>鞍面 $y = 0.4(x^2 - z^2)$ 在原點的梯度為零，是一個臨界點。若用梯度下降法，優化器會在此<em>卡住</em>，誤以為找到了極小值。</p>
+    <p>Hessian 立刻揭穿問題：$H = \\begin{bmatrix}0.8&0\\\\0&-0.8\\end{bmatrix}$，$\\det H = -0.64 < 0$——不定矩陣，特徵值一正一負。</p>
     <ul>
-      <li><span style="color:#A3BE8C"><strong>沿 $x$ 軸方向</strong></span>（綠色箭頭，$\\lambda = +2$）：曲面向上彎，球會滾回原點——局部穩定。</li>
-      <li><span style="color:#BF616A"><strong>沿 $y$ 軸方向</strong></span>（紅色箭頭，$\\lambda = -2$）：曲面向下彎，球往外逃——不穩定。</li>
+      <li><span style="color:#A3BE8C"><strong>沿 $x$ 軸方向</strong></span>（綠色箭頭，$\\lambda = +0.8$）：曲面向上彎，球會滾回原點——局部穩定。</li>
+      <li><span style="color:#BF616A"><strong>沿 $z$ 軸方向</strong></span>（紅色箭頭，$\\lambda = -0.8$）：曲面向下彎，球往外逃——不穩定。</li>
     </ul>
     <p>這正是現代優化器（Adam、L-BFGS）引入 Hessian 或其近似的根本原因：梯度資訊無法區分極小值與鞍點。Hessian 的特徵值符號組合——全正、全負、或正負混合——讓分類變得明確無爭議。</p>
   `,

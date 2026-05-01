@@ -75,7 +75,7 @@ export class CurvatureScene {
     const colorL1 = lambda1 >= 0 ? 0xD08770 : 0x5E81AC;
     const colorL2 = lambda2 >= 0 ? 0xD08770 : 0x5E81AC;
 
-    // Draw ellipse for definite matrices (level curve z=c for c=2)
+    // Draw ellipse for definite matrices (level curve f(x, z)=c for c=2)
     if (def === 'positive-definite' || def === 'negative-definite') {
       const c = 2;
       const a = Math.abs(lambda1) > 0.01 ? Math.sqrt(2 * c / Math.abs(lambda1)) : 4;

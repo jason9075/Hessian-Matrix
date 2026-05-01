@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createAxesGuide, createSurfaceGeometry } from './utils.js';
 
-// z = 0.5*(x² − z²): stable in x, unstable in z
+// y = 0.4*(x² − z²): stable in x, unstable in z
 const saddleFn = (x, z) => 0.4 * (x * x - z * z);
 
 export class SaddleScene {
